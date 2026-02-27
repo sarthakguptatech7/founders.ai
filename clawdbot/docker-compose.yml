@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  clawdbot:
+    build: .
+    container_name: clawdbot-agent
+    restart: unless-stopped
+    environment:
+      # Change this to your deployed Vercel URL when running in production
+      - SERVER_URL=http://host.docker.internal:3000
+      - NODE_ENV=development
+    volumes:
+      # Persist the WhatsApp Web session to avoid rescanning QR codes on restart
+      - ./wa-session-data:/app/.wa-session
+    # Uncomment if you need timezone support
+    # - TZ=America/New_York

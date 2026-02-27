@@ -1,0 +1,6 @@
+2026/02/22-10:16:02.926 292269 Reusing MANIFEST /Users/sarthakgupta/founders - openclaw/openclaw/clawdbot/.wa-session/Default/Local Storage/leveldb/MANIFEST-000001
+2026/02/22-10:16:02.929 292269 Recovering log #4
+2026/02/22-10:16:02.930 292269 Reusing old log /Users/sarthakgupta/founders - openclaw/openclaw/clawdbot/.wa-session/Default/Local Storage/leveldb/000004.log 
+2026/02/22-11:18:03.675 29226c Level-0 table #8: started
+2026/02/22-11:18:03.680 29226c Level-0 table #8: 13398 bytes OK
+2026/02/22-11:18:03.683 29226c Delete type=0 #4

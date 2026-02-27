@@ -1,0 +1,13 @@
+{
+    "name": "clawdbot-agent",
+    "version": "1.2.0",
+    "description": "Clawdbot — Local WhatsApp automation agent",
+    "main": "agent.js",
+    "scripts": {
+        "start": "node agent.js",
+        "install-browser": "npx playwright install chromium"
+    },
+    "dependencies": {
+        "playwright": "^1.42.0"
+    }
+}
