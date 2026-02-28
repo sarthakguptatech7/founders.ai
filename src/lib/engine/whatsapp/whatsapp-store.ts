@@ -43,6 +43,7 @@ export interface WADevice {
     authToken: string;
     lastSeen: string | null;
     platform: string;
+    qrData: string | null;
 }
 
 // ===== STORE =====
@@ -193,7 +194,7 @@ class WhatsAppStore {
     registerDevice(platform: string): WADevice {
         this.device = {
             id: uuid(), status: 'connected', authToken: uuid(),
-            lastSeen: new Date().toISOString(), platform,
+            lastSeen: new Date().toISOString(), platform, qrData: null,
         };
         return this.device;
     }
@@ -205,6 +206,13 @@ class WhatsAppStore {
     setDeviceStatus(status: WADevice['status']) {
         if (this.device) {
             this.device.status = status;
+            this.device.lastSeen = new Date().toISOString();
+        }
+    }
+
+    setQRData(qrData: string | null) {
+        if (this.device) {
+            this.device.qrData = qrData;
             this.device.lastSeen = new Date().toISOString();
         }
     }

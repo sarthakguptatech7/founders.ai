@@ -56,7 +56,24 @@ class ClawdbotAgent {
 
         // Step 3: Wait for login
         console.log('[Agent] Please scan the QR code if needed...');
-        const loggedIn = await this.wa.waitForLogin(120000);
+        const loggedIn = await this.wa.waitForLogin(120000, async (qrData) => {
+            console.log('[Agent] 📸 Extracted QR Code! Sending to server...');
+            try {
+                await fetch(`${SERVER_URL}/api/whatsapp/agent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'qr',
+                        qrData,
+                        authToken: this.authToken,
+                        messageId: 'qr-update', // placeholder
+                        status: 'pending' // placeholder
+                    }),
+                });
+            } catch (err) {
+                console.error('[Agent] ❌ Failed to send QR to server:', err.message);
+            }
+        });
         if (!loggedIn) {
             console.error('[Agent] ❌ Login failed. Please try again.');
             await this.wa.close();

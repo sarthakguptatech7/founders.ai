@@ -739,6 +739,7 @@ function AudienceInsights() {
 function ClawdbotSection({ profile }: { profile: BusinessProfile | null }) {
     const [subTab, setSubTab] = useState<'device' | 'contacts' | 'creator' | 'scheduler' | 'dashboard' | 'logs' | 'email'>('device');
     const [deviceStatus, setDeviceStatus] = useState<'disconnected' | 'scanning' | 'connected'>('disconnected');
+    const [qrData, setQrData] = useState<string | null>(null);
     const [contacts, setContacts] = useState<{ id?: string; name: string; phone: string; tags: string; status: string }[]>([]);
     const [messageTemplate, setMessageTemplate] = useState(`Hi {name}! 🎉\nGet 20% off on our ${profile?.industry || 'premium'} services today.\nOrder now: {link}`);
     const [tone, setTone] = useState('friendly');
@@ -780,9 +781,24 @@ function ClawdbotSection({ profile }: { profile: BusinessProfile | null }) {
         return () => clearInterval(interval);
     }, [subTab, loadCampaigns]);
 
+    // Poll QR code when scanning
+    useEffect(() => {
+        if (deviceStatus !== 'scanning') return;
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch('/api/whatsapp/qr');
+                const data = await res.json();
+                if (data.status === 'connected') setDeviceStatus('connected');
+                if (data.qrData) setQrData(data.qrData);
+            } catch { /* ignore */ }
+        }, 1500);
+        return () => clearInterval(interval);
+    }, [deviceStatus]);
+
     // Connect device
     const handleConnect = useCallback(async () => {
         setDeviceStatus('scanning');
+        setQrData(null);
         try {
             const res = await fetch('/api/whatsapp/agent', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform: navigator.platform || 'unknown' }) });
             if (res.ok) { setTimeout(() => setDeviceStatus('connected'), 2000); } else { setDeviceStatus('disconnected'); }
@@ -1034,11 +1050,17 @@ function ClawdbotSection({ profile }: { profile: BusinessProfile | null }) {
                             )}
                             {deviceStatus === 'scanning' && (
                                 <>
-                                    <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}
-                                        style={{ width: 160, height: 160, margin: '0 auto 20px', borderRadius: 12, background: 'rgba(255,255,255,0.05)', border: `2px solid ${COLORS.amber}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 }}>
-                                        <div style={{ fontSize: 36 }}></div>
-                                        <div style={{ fontSize: 10, color: COLORS.amber, fontFamily: 'var(--font-mono)' }}>SCAN QR CODE</div>
-                                    </motion.div>
+                                    <div style={{ width: 160, height: 160, margin: '0 auto 20px', borderRadius: 12, background: 'rgba(255,255,255,0.05)', border: `2px solid ${COLORS.amber}40`, overflow: 'hidden', position: 'relative' }}>
+                                        {qrData ? (
+                                            <img src={qrData} alt="QR Code" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}
+                                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 }}>
+                                                <div style={{ fontSize: 36 }}></div>
+                                                <div style={{ fontSize: 10, color: COLORS.amber, fontFamily: 'var(--font-mono)' }}>FETCHING QR...</div>
+                                            </motion.div>
+                                        )}
+                                    </div>
                                     <div style={{ fontSize: 14, color: COLORS.amber }}>Waiting for QR scan...</div>
                                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Open WhatsApp → Linked Devices → Scan</div>
                                 </>
@@ -1048,7 +1070,10 @@ function ClawdbotSection({ profile }: { profile: BusinessProfile | null }) {
                                     <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                                         style={{ width: 80, height: 80, margin: '0 auto 16px', borderRadius: '50%', background: `${COLORS.green}20`, border: `2px solid ${COLORS.green}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}></motion.div>
                                     <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.green, marginBottom: 4 }}>Device Connected</div>
-                                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>WhatsApp session active • Ready to send</div>
+                                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>WhatsApp session active • Ready to send</div>
+                                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                                        onClick={handleConnect}
+                                        style={{ padding: '6px 16px', borderRadius: 6, border: `1px solid rgba(255,255,255,0.2)`, background: 'transparent', color: '#FFF', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Configure Account</motion.button>
                                 </>
                             )}
                         </div>

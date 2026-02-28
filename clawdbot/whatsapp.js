@@ -106,10 +106,12 @@ class WhatsAppAutomation {
     /**
      * Wait for WhatsApp to be ready
      */
-    async waitForLogin(timeoutMs = 300000) {
+    async waitForLogin(timeoutMs = 300000, onQR = null) {
         console.log('[WA] Waiting for login (5 min timeout)...');
         console.log('[WA] If you see a QR code, scan it with your phone.');
         console.log('[WA] If already logged in, waiting for chat list to load...');
+
+        let lastQR = null;
 
         const start = Date.now();
         while (Date.now() - start < timeoutMs) {
@@ -138,6 +140,20 @@ class WhatsAppAutomation {
                         console.log('[WA] ✅ Logged in! (detected via page content)');
                         await this.sleep(2000);
                         return true;
+                    }
+                } catch { /* skip */ }
+            }
+
+            // Extract QR code if requested
+            if (onQR && !this.loggedIn) {
+                try {
+                    const qrDataUrl = await this.page.evaluate(() => {
+                        const canvas = document.querySelector('canvas');
+                        return canvas ? canvas.toDataURL('image/png') : null;
+                    });
+                    if (qrDataUrl && qrDataUrl !== lastQR) {
+                        lastQR = qrDataUrl;
+                        onQR(qrDataUrl);
                     }
                 } catch { /* skip */ }
             }

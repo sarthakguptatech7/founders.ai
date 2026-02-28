@@ -62,12 +62,22 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { messageId, status, error, authToken } = body;
+        const { messageId, status, error, authToken, type, qrData } = body;
 
         // Verify device
         const device = waStore.getDevice();
         if (!device || device.authToken !== authToken) {
             return NextResponse.json({ error: 'Unauthorized agent' }, { status: 401 });
+        }
+
+        if (type === 'qr') {
+            waStore.setQRData(qrData);
+            return NextResponse.json({ ok: true });
+        }
+
+        if (type === 'status') {
+            waStore.setDeviceStatus(status);
+            return NextResponse.json({ ok: true });
         }
 
         if (!messageId || !status) {
