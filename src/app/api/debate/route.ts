@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import { runDebate } from '@/lib/engine/debate-engine';
 import { AgentMessage, DebatePhase, ConflictSummary } from '@/lib/types';
 
+export const runtime = 'edge';
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();

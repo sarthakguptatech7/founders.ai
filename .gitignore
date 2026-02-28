@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+.wa-session
+clawdbot/wa-session-data/
 
 # debug
 npm-debug.log*
