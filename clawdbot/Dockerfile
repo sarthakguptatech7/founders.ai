@@ -23,7 +23,6 @@ COPY whatsapp.js .
 # Create volume mount point for WhatsApp session data
 # This is crucial so we don't have to scan the QR code every time the container restarts
 RUN mkdir -p /app/.wa-session
-VOLUME /app/.wa-session
 
 # Run the agent
 CMD ["node", "agent.js"]
